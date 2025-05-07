@@ -1,7 +1,8 @@
 import grpc
 import asyncio
-import fl_pb2
-import fl_pb2_grpc
+from fl_app import fl_pb2
+from fl_app import fl_pb2_grpc
+from fl_app.server_app.server_config import ServerConfig
 
 class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
 
@@ -11,9 +12,9 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
         self.lock = asyncio.Lock()
         self.iteration_ready = asyncio.Event()
         self.current_clients = 0
-        self.max_clients = 2
+        self.max_clients = ServerConfig.max_clients
         self.current_iteration = 0
-        self.train_iterations = 20 
+        self.train_iterations = ServerConfig.train_iterations
         self.need_reset = False
 
     def get_ready_train(self):

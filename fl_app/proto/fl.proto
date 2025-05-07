@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package FedLearn;
+package fl_app;
 
 service FedLearn {
   rpc GetModel (stream Ready) returns (stream ModelReady);

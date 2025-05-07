@@ -24,19 +24,19 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x08\x66l.proto\x12\x08\x46\x65\x64Learn\"\x16\n\x05Ready\x12\r\n\x05ready\x18\x01 \x01(\t\"\x1b\n\nReadyReply\x12\r\n\x05ready\x18\x01 \x01(\x08\"9\n\nModelReady\x12\x0e\n\x04wait\x18\x01 \x01(\x08H\x00\x12\x0f\n\x05model\x18\x02 \x01(\x05H\x00\x42\n\n\x08response2u\n\x08\x46\x65\x64Learn\x12\x35\n\x08GetModel\x12\x0f.FedLearn.Ready\x1a\x14.FedLearn.ModelReady(\x01\x30\x01\x12\x32\n\tModelPoll\x12\x0f.FedLearn.Ready\x1a\x14.FedLearn.ReadyReplyb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x08\x66l.proto\x12\x06\x66l_app\"\x16\n\x05Ready\x12\r\n\x05ready\x18\x01 \x01(\t\"\x1b\n\nReadyReply\x12\r\n\x05ready\x18\x01 \x01(\x08\"9\n\nModelReady\x12\x0e\n\x04wait\x18\x01 \x01(\x08H\x00\x12\x0f\n\x05model\x18\x02 \x01(\x05H\x00\x42\n\n\x08response2m\n\x08\x46\x65\x64Learn\x12\x31\n\x08GetModel\x12\r.fl_app.Ready\x1a\x12.fl_app.ModelReady(\x01\x30\x01\x12.\n\tModelPoll\x12\r.fl_app.Ready\x1a\x12.fl_app.ReadyReplyb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'fl_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_READY']._serialized_start=22
-  _globals['_READY']._serialized_end=44
-  _globals['_READYREPLY']._serialized_start=46
-  _globals['_READYREPLY']._serialized_end=73
-  _globals['_MODELREADY']._serialized_start=75
-  _globals['_MODELREADY']._serialized_end=132
-  _globals['_FEDLEARN']._serialized_start=134
-  _globals['_FEDLEARN']._serialized_end=251
+  _globals['_READY']._serialized_start=20
+  _globals['_READY']._serialized_end=42
+  _globals['_READYREPLY']._serialized_start=44
+  _globals['_READYREPLY']._serialized_end=71
+  _globals['_MODELREADY']._serialized_start=73
+  _globals['_MODELREADY']._serialized_end=130
+  _globals['_FEDLEARN']._serialized_start=132
+  _globals['_FEDLEARN']._serialized_end=241
 # @@protoc_insertion_point(module_scope)

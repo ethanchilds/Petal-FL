@@ -1,6 +1,6 @@
 import grpc
-import fl_pb2
-import fl_pb2_grpc
+from fl_app import fl_pb2
+from fl_app import fl_pb2_grpc
 import asyncio
 import argparse
 
