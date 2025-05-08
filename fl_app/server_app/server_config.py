@@ -1,5 +1,3 @@
-
-
 class ServerConfig:
 
     max_clients = 2

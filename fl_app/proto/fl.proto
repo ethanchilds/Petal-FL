@@ -18,7 +18,7 @@ message ReadyReply {
 message ModelReady {
   oneof response {
     bool wait = 1;
-    int32 model = 2;
+    bytes model = 2;
   }
 }
 

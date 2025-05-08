@@ -1,14 +1,18 @@
 import grpc
+import io
+import torch
 import asyncio
 from fl_app import fl_pb2
 from fl_app import fl_pb2_grpc
 from fl_app.server_app.server_config import ServerConfig
+from fl_app.base_model import SimpleNN
+from fl_app.util.torch_serialize import serialize, deserialize
 
 class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
 
     def __init__(self):
         self.ready_train = True
-        
+        self.model = SimpleNN()
         self.lock = asyncio.Lock()
         self.iteration_ready = asyncio.Event()
         self.current_clients = 0
@@ -16,6 +20,7 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
         self.current_iteration = 0
         self.train_iterations = ServerConfig.train_iterations
         self.need_reset = False
+        self.buffer = io.BytesIO()
 
     def get_ready_train(self):
         return self.ready_train
@@ -48,7 +53,7 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
                 yield fl_pb2.ModelReady(wait=True)
                 break
             else:
-                yield fl_pb2.ModelReady(model=self.current_iteration)
+                yield fl_pb2.ModelReady(model=serialize(self.model, self.buffer))
 
 async def serve():
     server = grpc.aio.server()
