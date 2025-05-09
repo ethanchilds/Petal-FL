@@ -6,7 +6,7 @@ from fl_app import fl_pb2
 from fl_app import fl_pb2_grpc
 from fl_app.server_app.server_config import ServerConfig
 from fl_app.base_model import SimpleNN
-from fl_app.util.torch_serialize import serialize, deserialize
+from fl_app.util.torch_tools import serialize, deserialize
 
 class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
 

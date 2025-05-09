@@ -1,12 +1,12 @@
 import grpc
-import io
 import torch
+import pandas as pd
 from fl_app import fl_pb2
 from fl_app import fl_pb2_grpc
 import asyncio
 import argparse
 from fl_app.base_model import SimpleNN
-from fl_app.util.torch_serialize import serialize, deserialize
+from fl_app.util.torch_tools import serialize, deserialize, train
 
 
 class FedLearnClient():
@@ -14,6 +14,7 @@ class FedLearnClient():
     def __init__(self, client_id):
         self.client_id = client_id
         self.model = SimpleNN()
+        self.iter = 0
 
     async def model_poll(self, stub):
         # Assign to a daemon or have it await in future
@@ -34,6 +35,15 @@ class FedLearnClient():
             if which == "model":
                 received_model = deserialize(response.model)
                 self.model.load_state_dict(received_model)
+                print(f"############### ITER:"+ str(self.iter) + "###############")
+                print(f"############### RECEIVED MODEL ###############\n")
+                print(self.model.state_dict())
+
+                print(f"\n\n############### TRAINED MODEL ###############\n")
+                train(self.client_id, self.model)
+                print(self.model.state_dict())
+                self.iter += 1
+                
                 await response_stream.write(fl_pb2.Ready(ready=f'Client {self.client_id}'))
             else:
                 break

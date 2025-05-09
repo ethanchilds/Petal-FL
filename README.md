@@ -10,3 +10,4 @@ Model architecture should be shared ahead of time. Likely at connect msg.
 
 should I inclue GPU acceleration? Might reduce start time of PyTorch
 
+Need to implement server refresh mechanism
