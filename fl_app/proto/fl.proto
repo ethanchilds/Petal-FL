@@ -3,7 +3,7 @@ syntax = "proto3";
 package fl_app;
 
 service FedLearn {
-  rpc GetModel (stream Ready) returns (stream ModelReady);
+  rpc GetModel (stream ClientFetchModel) returns (stream ModelReady);
   rpc ModelPoll (Ready) returns (ReadyReply);
 }
 
@@ -13,6 +13,13 @@ message Ready {
 
 message ReadyReply {
   bool ready = 1;
+}
+
+message ClientFetchModel {
+  oneof response {
+    bool ready = 1;
+    bytes model = 2;
+  }
 }
 
 message ModelReady {

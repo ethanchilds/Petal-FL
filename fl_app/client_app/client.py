@@ -25,7 +25,7 @@ class FedLearnClient():
     async def train_model(self, stub):
         response_stream = stub.GetModel()
 
-        await response_stream.write(fl_pb2.Ready(ready='Client1'))
+        await response_stream.write(fl_pb2.ClientFetchModel(ready=True))
 
         while True:
 
@@ -44,7 +44,7 @@ class FedLearnClient():
                 print(self.model.state_dict())
                 self.iter += 1
                 
-                await response_stream.write(fl_pb2.Ready(ready=f'Client {self.client_id}'))
+                await response_stream.write(fl_pb2.ClientFetchModel(ready=True))
             else:
                 break
 

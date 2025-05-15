@@ -32,6 +32,9 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
         return fl_pb2.ReadyReply(ready = msg)
     
     async def GetModel(self, request_iterator, context):
+        #client_ready = await anext(request_iterator)
+        #print(client_ready.ready)
+
         async for _ in request_iterator:
             async with self.lock:
                 self.current_clients += 1
