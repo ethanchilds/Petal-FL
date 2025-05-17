@@ -1,5 +1,6 @@
 import grpc
 import torch
+import io
 import pandas as pd
 from fl_app import fl_pb2
 from fl_app import fl_pb2_grpc
@@ -15,21 +16,25 @@ class FedLearnClient():
         self.client_id = client_id
         self.model = SimpleNN()
         self.iter = 0
+        self.buffer = io.BytesIO()
 
     async def model_poll(self, stub):
         # Assign to a daemon or have it await in future
-        result = await stub.ModelPoll(fl_pb2.Ready(ready = f"client_id: {self.client_id}"))
+        request = fl_pb2.Ready(ready = f"client_id: {self.client_id}")
+        result = await stub.ModelPoll(request)
         return result.ready
 
 
     async def train_model(self, stub):
         response_stream = stub.GetModel()
 
-        await response_stream.write(fl_pb2.ClientFetchModel(ready=True))
+        request = fl_pb2.ClientFetchModel(send_model = True)
+        await response_stream.write(request)
 
         while True:
 
             response = await response_stream.read()
+            print("received response!!!!!!!!!!!!!!")
             which = response.WhichOneof("response")
 
             if which == "model":
@@ -43,8 +48,8 @@ class FedLearnClient():
                 train(self.client_id, self.model)
                 print(self.model.state_dict())
                 self.iter += 1
-                
-                await response_stream.write(fl_pb2.ClientFetchModel(ready=True))
+                update_data = fl_pb2.UpdateData(model=serialize(self.model, self.buffer), data_size=100)
+                await response_stream.write(fl_pb2.ClientFetchModel(model_data = update_data))
             else:
                 break
 

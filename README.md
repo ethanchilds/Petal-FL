@@ -1,6 +1,6 @@
 # Petal_FL
 
-py -m grpc_tools.protoc -I=fl_app/proto --python_out=fl_app fl_app/proto/fl.proto
+py -m grpc_tools.protoc -I=fl_app/proto --python_out=fl_app --grpc_python_out=fl_app fl_app/proto/fl.proto
 - improperly imports fl_pb2 to fl_pb2_grpc, need to fix
 
 py -m fl_app.server_app.server

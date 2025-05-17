@@ -15,10 +15,15 @@ message ReadyReply {
   bool ready = 1;
 }
 
+message UpdateData {
+  bytes model = 1;
+  int32 data_size = 2;
+}
+
 message ClientFetchModel {
   oneof response {
-    bool ready = 1;
-    bytes model = 2;
+    bool send_model = 1;
+    UpdateData model_data = 2;
   }
 }
 

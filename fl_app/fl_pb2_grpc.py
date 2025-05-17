@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from fl_app import fl_pb2 as fl__pb2
+import fl_app.fl_pb2 as fl__pb2
 
 GRPC_GENERATED_VERSION = '1.71.0'
 GRPC_VERSION = grpc.__version__
@@ -35,12 +35,12 @@ class FedLearnStub(object):
             channel: A grpc.Channel.
         """
         self.GetModel = channel.stream_stream(
-                '/FedLearn.FedLearn/GetModel',
-                request_serializer=fl__pb2.Ready.SerializeToString,
+                '/fl_app.FedLearn/GetModel',
+                request_serializer=fl__pb2.ClientFetchModel.SerializeToString,
                 response_deserializer=fl__pb2.ModelReady.FromString,
                 _registered_method=True)
         self.ModelPoll = channel.unary_unary(
-                '/FedLearn.FedLearn/ModelPoll',
+                '/fl_app.FedLearn/ModelPoll',
                 request_serializer=fl__pb2.Ready.SerializeToString,
                 response_deserializer=fl__pb2.ReadyReply.FromString,
                 _registered_method=True)
@@ -66,7 +66,7 @@ def add_FedLearnServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'GetModel': grpc.stream_stream_rpc_method_handler(
                     servicer.GetModel,
-                    request_deserializer=fl__pb2.Ready.FromString,
+                    request_deserializer=fl__pb2.ClientFetchModel.FromString,
                     response_serializer=fl__pb2.ModelReady.SerializeToString,
             ),
             'ModelPoll': grpc.unary_unary_rpc_method_handler(
@@ -76,9 +76,9 @@ def add_FedLearnServicer_to_server(servicer, server):
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'FedLearn.FedLearn', rpc_method_handlers)
+            'fl_app.FedLearn', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('FedLearn.FedLearn', rpc_method_handlers)
+    server.add_registered_method_handlers('fl_app.FedLearn', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
@@ -99,8 +99,8 @@ class FedLearn(object):
         return grpc.experimental.stream_stream(
             request_iterator,
             target,
-            '/FedLearn.FedLearn/GetModel',
-            fl__pb2.Ready.SerializeToString,
+            '/fl_app.FedLearn/GetModel',
+            fl__pb2.ClientFetchModel.SerializeToString,
             fl__pb2.ModelReady.FromString,
             options,
             channel_credentials,
@@ -126,7 +126,7 @@ class FedLearn(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/FedLearn.FedLearn/ModelPoll',
+            '/fl_app.FedLearn/ModelPoll',
             fl__pb2.Ready.SerializeToString,
             fl__pb2.ReadyReply.FromString,
             options,

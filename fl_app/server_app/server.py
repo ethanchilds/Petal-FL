@@ -6,6 +6,7 @@ from fl_app import fl_pb2
 from fl_app import fl_pb2_grpc
 from fl_app.server_app.server_config import ServerConfig
 from fl_app.base_model import SimpleNN
+from fl_app.server_app.fed_avg import FedAvg
 from fl_app.util.torch_tools import serialize, deserialize
 
 class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
@@ -21,6 +22,7 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
         self.train_iterations = ServerConfig.train_iterations
         self.need_reset = False
         self.buffer = io.BytesIO()
+        self.fed_avg = FedAvg()
 
     def get_ready_train(self):
         return self.ready_train
@@ -32,10 +34,12 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
         return fl_pb2.ReadyReply(ready = msg)
     
     async def GetModel(self, request_iterator, context):
-        #client_ready = await anext(request_iterator)
-        #print(client_ready.ready)
+        async for request in request_iterator:
 
-        async for _ in request_iterator:
+            which = request.WhichOneof("response")
+            if which == "model_data":
+                await self.fed_avg.add_model(deserialize(request.model_data.model), request.model_data.data_size)
+                
             async with self.lock:
                 self.current_clients += 1
                 if self.current_clients == self.max_clients:
@@ -44,6 +48,7 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
 
             await self.iteration_ready.wait()
 
+
             async with self.lock:
                 if self.need_reset:
                     self.need_reset = False
@@ -51,6 +56,9 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
                     self.current_clients = 0
                     self.current_iteration += 1
 
+                    if which == "model_data":
+                        updated_model = self.fed_avg.fed_avg()
+                        self.model.load_state_dict(updated_model)
 
             if self.current_iteration == self.train_iterations:
                 yield fl_pb2.ModelReady(wait=True)
