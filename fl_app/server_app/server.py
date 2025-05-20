@@ -7,6 +7,10 @@ from fl_app.config import Config
 from fl_app.server_app.fed_avg import FedAvg
 from fl_app.util import torch_tools
 
+import copy
+import torch
+from collections import OrderedDict
+
 class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
 
     def __init__(self):
@@ -41,7 +45,6 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
             async with self.lock:
                 self.current_clients += 1
                 if self.current_clients == self.max_clients:
-                    print(self.current_iteration)
                     self.iteration_ready.set()
                     self.need_reset = True
 
@@ -56,9 +59,10 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
                     self.current_iteration += 1
 
                     if which == "model_data":
+                        pretrain = copy.deepcopy(self.model.state_dict())
                         updated_model = self.fed_avg.fed_avg()
-                        torch_tools.state_dicts_equal(updated_model, self.model.state_dict())
                         self.model.load_state_dict(updated_model)
+                        #print(torch_tools.state_dicts_equal(pretrain, self.model.state_dict()))
 
             if self.current_iteration == self.train_iterations:
                 yield fl_pb2.ModelReady(wait=True)

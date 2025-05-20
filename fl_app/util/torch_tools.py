@@ -19,15 +19,19 @@ def load_data(path):
 
 def train(model, criterion, optimizer, dataloader):
 
-        for _ in range(1):
+        model.train()
+
+        for _ in range(5):
                 running_loss = 0.0
                 for x, y in dataloader:
                         optimizer.zero_grad()
                         outputs = model(x)
                         loss = criterion(outputs, y)
                         loss.backward()
+
                         optimizer.step()
                         running_loss += loss.item()
+
 
 
 
@@ -36,5 +40,11 @@ def state_dicts_equal(dict1, dict2):
         return False
     for key in dict1:
         if not torch.equal(dict1[key], dict2[key]):
+            return False
+    return True
+
+def state_dicts_close(dict1, dict2, tol=1e-5):
+    for key in dict1:
+        if not torch.allclose(dict1[key], dict2[key], atol=tol):
             return False
     return True

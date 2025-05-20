@@ -6,7 +6,6 @@ import asyncio
 import argparse
 from fl_app.config import Config
 from fl_app.util import torch_tools
-#from fl_app.CIFAR10 import load_cifar10_partition
 
 
 class FedLearnClient():
@@ -38,7 +37,9 @@ class FedLearnClient():
             if which == "model":
                 received_model = torch_tools.deserialize(response.model)
                 self.model.load_state_dict(received_model)
+
                 Config.train_function(self.model, self.dataloader)
+
 
                 update_data = fl_pb2.UpdateData(model=torch_tools.serialize(self.model, self.buffer), data_size=len(self.dataloader))
                 await response_stream.write(fl_pb2.ClientFetchModel(model_data = update_data))

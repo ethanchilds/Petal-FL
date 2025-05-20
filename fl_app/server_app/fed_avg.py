@@ -1,6 +1,9 @@
 import asyncio
 import torch
 from collections import OrderedDict
+from fl_app.util import torch_tools
+
+import copy
 
 class FedAvg():
 
@@ -23,8 +26,8 @@ class FedAvg():
         for key in self.updated_models[0]:
             new_param = torch.zeros_like(self.updated_models[0][key])
 
-            for i in range(len(self.updated_models)):
-                new_param += ((self.data_sizes[i] / total)*self.updated_models[i][key])
+            for i, model in enumerate(self.updated_models):
+                new_param += ((self.data_sizes[i] / total) * model[key])
                     
             new_state[key] = new_param
 
