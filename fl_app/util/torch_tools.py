@@ -19,13 +19,13 @@ def load_data(path):
         return DataLoader(TensorDataset(X, y), batch_size=16, shuffle=True)
 
 def train(client_id, model):
-        path = 'fl_app/data/dataset_' + str(client_id) + '.csv'
+        path = 'fl_app/data/dataset_' + str(client_id+1) + '.csv'
         dataloader = load_data(path)
 
         criterion = nn.MSELoss()
         optimizer = optim.Adam(model.parameters(), lr=0.01)
 
-        for epoch in range(20):
+        for epoch in range(50):
                 running_loss = 0.0
                 for X_batch, y_batch in dataloader:
                         optimizer.zero_grad()
@@ -34,3 +34,13 @@ def train(client_id, model):
                         loss.backward()
                         optimizer.step()
                         running_loss += loss.item()
+
+
+
+def state_dicts_equal(dict1, dict2):
+    if dict1.keys() != dict2.keys():
+        return False
+    for key in dict1:
+        if not torch.equal(dict1[key], dict2[key]):
+            return False
+    return True

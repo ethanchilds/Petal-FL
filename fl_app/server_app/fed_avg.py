@@ -1,4 +1,6 @@
 import asyncio
+import torch
+from collections import OrderedDict
 
 class FedAvg():
 
@@ -15,24 +17,17 @@ class FedAvg():
             self.data_sizes.append(data_size)
 
     def fed_avg(self):
-        new_state = {}
+        new_state = OrderedDict()
         total = sum(self.data_sizes)
 
         for key in self.updated_models[0]:
-            new_weight = 0
+            new_param = torch.zeros_like(self.updated_models[0][key])
 
             for i in range(len(self.updated_models)):
-                new_weight += ((self.data_sizes[i] / total)*self.updated_models[i][key])
+                new_param += ((self.data_sizes[i] / total)*self.updated_models[i][key])
+                    
+            new_state[key] = new_param
 
-            new_state[key] = new_weight
-        
         self.updated_models = []
         self.data_sizes = []
         return new_state
-    
-    def print_state(self):
-        print(self.updated_models)
-        print(self.data_sizes)
-
-        self.updated_models = []
-        self.data_sizes = []

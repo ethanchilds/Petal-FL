@@ -7,7 +7,7 @@ from fl_app import fl_pb2_grpc
 from fl_app.server_app.server_config import ServerConfig
 from fl_app.base_model import SimpleNN
 from fl_app.server_app.fed_avg import FedAvg
-from fl_app.util.torch_tools import serialize, deserialize
+from fl_app.util import torch_tools
 
 class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
 
@@ -38,7 +38,7 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
 
             which = request.WhichOneof("response")
             if which == "model_data":
-                await self.fed_avg.add_model(deserialize(request.model_data.model), request.model_data.data_size)
+                await self.fed_avg.add_model(torch_tools.deserialize(request.model_data.model), request.model_data.data_size)
                 
             async with self.lock:
                 self.current_clients += 1
@@ -64,7 +64,7 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
                 yield fl_pb2.ModelReady(wait=True)
                 break
             else:
-                yield fl_pb2.ModelReady(model=serialize(self.model, self.buffer))
+                yield fl_pb2.ModelReady(model=torch_tools.serialize(self.model, self.buffer))
 
 async def serve():
     server = grpc.aio.server()
@@ -73,6 +73,9 @@ async def serve():
     await server.start()
     print('Listening on 50051...')
     await server.wait_for_termination()
+
+async def start_server():
+    await serve()
 
 if __name__ == "__main__":
     asyncio.run(serve())
