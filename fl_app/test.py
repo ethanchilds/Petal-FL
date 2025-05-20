@@ -1,4 +1,4 @@
-from fl_app.base_model import SimpleNN
+from fl_app.simple_model import SimpleNN
 import torch
 
 bias = torch.tensor([0.1, 0.2, 0.3])

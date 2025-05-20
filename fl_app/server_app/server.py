@@ -1,11 +1,9 @@
 import grpc
 import io
-import torch
 import asyncio
 from fl_app import fl_pb2
 from fl_app import fl_pb2_grpc
-from fl_app.server_app.server_config import ServerConfig
-from fl_app.base_model import SimpleNN
+from fl_app.config import Config
 from fl_app.server_app.fed_avg import FedAvg
 from fl_app.util import torch_tools
 
@@ -13,13 +11,13 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
 
     def __init__(self):
         self.ready_train = True
-        self.model = SimpleNN()
+        self.model = Config.model()
         self.lock = asyncio.Lock()
         self.iteration_ready = asyncio.Event()
         self.current_clients = 0
-        self.max_clients = ServerConfig.max_clients
+        self.max_clients = Config.max_clients
         self.current_iteration = 0
-        self.train_iterations = ServerConfig.train_iterations
+        self.train_iterations = Config.train_iterations
         self.need_reset = False
         self.buffer = io.BytesIO()
         self.fed_avg = FedAvg()
@@ -43,6 +41,7 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
             async with self.lock:
                 self.current_clients += 1
                 if self.current_clients == self.max_clients:
+                    print(self.current_iteration)
                     self.iteration_ready.set()
                     self.need_reset = True
 
@@ -58,6 +57,7 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
 
                     if which == "model_data":
                         updated_model = self.fed_avg.fed_avg()
+                        torch_tools.state_dicts_equal(updated_model, self.model.state_dict())
                         self.model.load_state_dict(updated_model)
 
             if self.current_iteration == self.train_iterations:
@@ -67,7 +67,7 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
                 yield fl_pb2.ModelReady(model=torch_tools.serialize(self.model, self.buffer))
 
 async def serve():
-    server = grpc.aio.server()
+    server = grpc.aio.server(options=Config.options)
     fl_pb2_grpc.add_FedLearnServicer_to_server(FedLearnServicer(), server)
     server.add_insecure_port('[::]:50051')
     await server.start()

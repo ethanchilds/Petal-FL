@@ -4,18 +4,18 @@ from fl_app import fl_pb2
 from fl_app import fl_pb2_grpc
 import asyncio
 import argparse
-from fl_app.base_model import SimpleNN
+from fl_app.config import Config
 from fl_app.util import torch_tools
-from fl_app.CIFAR10 import load_cifar10_partition
+#from fl_app.CIFAR10 import load_cifar10_partition
 
 
 class FedLearnClient():
 
     def __init__(self, client_id, num_clients):
         self.client_id = client_id
-        self.model = SimpleNN()
+        self.model = Config.model()
         self.buffer = io.BytesIO()
-        self.data_loader = load_cifar10_partition(client_id, num_clients)
+        self.dataloader = Config.dataloader(client_id, num_clients)
 
     async def model_poll(self, stub):
         # Assign to a daemon or have it await in future
@@ -38,9 +38,9 @@ class FedLearnClient():
             if which == "model":
                 received_model = torch_tools.deserialize(response.model)
                 self.model.load_state_dict(received_model)
-                torch_tools.train(self.client_id, self.model)
+                Config.train_function(self.model, self.dataloader)
 
-                update_data = fl_pb2.UpdateData(model=torch_tools.serialize(self.model, self.buffer), data_size=100)
+                update_data = fl_pb2.UpdateData(model=torch_tools.serialize(self.model, self.buffer), data_size=len(self.dataloader))
                 await response_stream.write(fl_pb2.ClientFetchModel(model_data = update_data))
             else:
                 break
@@ -50,7 +50,7 @@ class FedLearnClient():
 
 
     async def run(self):
-        async with grpc.aio.insecure_channel("localhost:50051") as channel:
+        async with grpc.aio.insecure_channel("localhost:50051", options=Config.options) as channel:
             stub = fl_pb2_grpc.FedLearnStub(channel)
             poll_result = await self.model_poll(stub)
 

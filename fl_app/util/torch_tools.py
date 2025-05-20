@@ -1,5 +1,4 @@
 import torch
-import torch.nn as nn
 import pandas as pd
 import io
 import torch.optim as optim
@@ -18,19 +17,14 @@ def load_data(path):
         y = torch.tensor(df["target"].values, dtype=torch.float32).unsqueeze(1)
         return DataLoader(TensorDataset(X, y), batch_size=16, shuffle=True)
 
-def train(client_id, model):
-        path = 'fl_app/data/dataset_' + str(client_id+1) + '.csv'
-        dataloader = load_data(path)
+def train(model, criterion, optimizer, dataloader):
 
-        criterion = nn.MSELoss()
-        optimizer = optim.Adam(model.parameters(), lr=0.01)
-
-        for epoch in range(50):
+        for _ in range(1):
                 running_loss = 0.0
-                for X_batch, y_batch in dataloader:
+                for x, y in dataloader:
                         optimizer.zero_grad()
-                        outputs = model(X_batch)
-                        loss = criterion(outputs, y_batch)
+                        outputs = model(x)
+                        loss = criterion(outputs, y)
                         loss.backward()
                         optimizer.step()
                         running_loss += loss.item()

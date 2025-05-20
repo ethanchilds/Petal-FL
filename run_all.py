@@ -10,7 +10,7 @@ def launch_server():
 def launch_client(client_id, num_clients):
     asyncio.run(client.start_client(client_id, num_clients))
 
-def main():
+def main(): 
     processes = []
     
     p_sever = multiprocessing.Process(target=launch_server)
