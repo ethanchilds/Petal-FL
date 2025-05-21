@@ -8,12 +8,15 @@ from fl_app.server_app.fed_avg import FedAvg
 from fl_app.util import torch_tools
 
 import copy
-import torch
-from collections import OrderedDict
+from fl_app.logging.log_set_up import setup_logger
+logger = setup_logger("server", level="INFO")
+
+import os
+os.environ["GRPC_VERBOSITY"] = "ERROR"
 
 class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
 
-    def __init__(self):
+    def __init__(self, done_event):
         self.ready_train = True
         self.model = Config.model()
         self.lock = asyncio.Lock()
@@ -26,10 +29,15 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
         self.buffer = io.BytesIO()
         self.fed_avg = FedAvg()
 
+        # TEMP: Only for cancelling server once fed learn is done
+        self.done = done_event
+        self.clients_done = 0
+
     def get_ready_train(self):
         return self.ready_train
 
     async def ModelPoll(self, request, context):
+        logger.info(f"Client {request.ready} connected")
         print(request.ready)
         
         msg = await asyncio.to_thread(self.get_ready_train)
@@ -62,7 +70,7 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
                         pretrain = copy.deepcopy(self.model.state_dict())
                         updated_model = self.fed_avg.fed_avg()
                         self.model.load_state_dict(updated_model)
-                        #print(torch_tools.state_dicts_equal(pretrain, self.model.state_dict()))
+                        #print(torch_tools.state_dicts_close(pretrain, updated_model))
 
             if self.current_iteration == self.train_iterations:
                 yield fl_pb2.ModelReady(wait=True)
@@ -70,13 +78,23 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
             else:
                 yield fl_pb2.ModelReady(model=torch_tools.serialize(self.model, self.buffer))
 
+        async with self.lock:
+            self.clients_done += 1
+            if self.clients_done == self.max_clients:
+                self.done.set()
+
+
 async def serve():
+    done = asyncio.Event()
+    
     server = grpc.aio.server(options=Config.options)
-    fl_pb2_grpc.add_FedLearnServicer_to_server(FedLearnServicer(), server)
+    fl_pb2_grpc.add_FedLearnServicer_to_server(FedLearnServicer(done), server)
     server.add_insecure_port('[::]:50051')
     await server.start()
     print('Listening on 50051...')
-    await server.wait_for_termination()
+    
+    await done.wait()
+    await server.stop(0)
 
 async def start_server():
     await serve()

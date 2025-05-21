@@ -4,7 +4,7 @@ from fl_app.simple_model import SimpleNN, train_simpleNN, get_simple_dataloader
 class Config:
 
     max_clients = 2
-    train_iterations = 5
+    train_iterations = 10
     train_function = train_simpleNN
     dataloader = get_simple_dataloader
     options=[

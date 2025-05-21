@@ -176,3 +176,7 @@ cython_debug/
 # CIFAR10
 
 /data/
+
+# Logs
+
+fl_app/logging/logs/

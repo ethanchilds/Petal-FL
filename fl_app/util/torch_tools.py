@@ -1,7 +1,6 @@
 import torch
 import pandas as pd
 import io
-import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
 
 def serialize(model, buffer):
@@ -21,7 +20,7 @@ def train(model, criterion, optimizer, dataloader):
 
         model.train()
 
-        for _ in range(5):
+        for _ in range(100):
                 running_loss = 0.0
                 for x, y in dataloader:
                         optimizer.zero_grad()

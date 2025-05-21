@@ -22,6 +22,6 @@ def get_simple_dataloader(client_id, num_clients):
 def train_simpleNN(model, dataloader):
 
     criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.01)
+    optimizer = optim.Adam(model.parameters(), lr=0.1)
 
     torch_tools.train(model, criterion, optimizer, dataloader)
