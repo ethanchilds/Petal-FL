@@ -19,6 +19,7 @@ class Config:
                  model,
                  epochs,
                  learning_rate,
+                 partition = False,
                  delay=None,
                  options=None):
     
@@ -29,6 +30,7 @@ class Config:
         self.model_class = model
         self.epochs = epochs
         self.lr = learning_rate
+        self.partition = partition
         self.delay = delay or [(0,0,0)]*max_clients
         self.options = options or []
 

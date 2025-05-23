@@ -23,12 +23,12 @@ class SimpleNN(nn.Module):
         x = self.fc2(x)
         return x
     
-def get_simple_dataloader(client_id):
+def get_simple_dataloader(batch_size = 16):
     path = 'data/dataset_' + str(1) + '.csv'
     df = pd.read_csv(path)
     X = torch.tensor(df[["feature1", "feature2"]].values, dtype=torch.float32)
     y = torch.tensor(df["target"].values, dtype=torch.float32).unsqueeze(1)
-    return DataLoader(TensorDataset(X, y), batch_size=16, shuffle=True)
+    return DataLoader(TensorDataset(X, y), batch_size=batch_size, shuffle=True)
 
 
 def train_simpleNN(model, dataloader, epochs, lr = 0.01):
@@ -61,11 +61,7 @@ if __name__ == "__main__":
         dataloader = get_simple_dataloader,
         model=SimpleNN,
         # recommend zipping tuples for more advanced settings
-        delay = [(0,0,0),(0,0,0)],
-        options=[
-            ('grpc.max_send_message_length', 100 * 1024 * 1024),
-            ('grpc.max_receive_message_length', 100 * 1024 * 1024),
-        ]
+        delay = [(0,0,0),(0,0,0)]
     )
 
     set_config(config)

@@ -4,6 +4,8 @@ import simple_fl_pb2 as fl_pb2
 import simple_fl_pb2_grpc as fl_pb2_grpc
 import asyncio
 import argparse
+import numpy as np
+from torch.utils.data import DataLoader, Subset
 from fl.util import torch_tools
 from fl.client_app.sleep_injector import SleepInjector
 
@@ -19,12 +21,16 @@ class FedLearnClient():
         self.client_id = client_id
         self.model = self.config.model()
         self.buffer = io.BytesIO()
-        self.dataloader = self.config.dataloader(client_id)
         self.epochs = self.config.epochs
         self.lr = self.config.lr
         self.work_delay = delay[0]
         self.receive_delay = delay[1]
         self.send_delay = delay[2]
+
+        if self.config.partition:
+            self.dataloader = self.subset_loader(self.config.dataloader(), self.config.max_clients, client_id)
+        else:
+            self.dataloader = self.config.dataloader()
 
     async def model_poll(self, stub):
         # Assign to a daemon or have it await in future
@@ -73,6 +79,22 @@ class FedLearnClient():
 
             if poll_result:
                 await self.train_model(stub)
+
+    def subset_loader(self, dataloader, num_clients, client_id):
+        dataset = dataloader.dataset
+        data_len = len(dataset)
+        indices = list(range(data_len))
+        np.random.seed(42)
+        np.random.shuffle(indices)
+
+        partition_size = data_len // num_clients
+        start = client_id * partition_size
+        end = start + partition_size
+
+        subset = Subset(dataset, indices[start:end])
+        subset_loader = DataLoader(subset, batch_size=dataloader.batch_size, shuffle=False)
+        return subset_loader
+
 
 async def start_client(client_id, num_clients):
     client = FedLearnClient(client_id, num_clients)
