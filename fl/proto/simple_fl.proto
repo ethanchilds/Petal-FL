@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package fl_app;
+
+service FedLearn {
+  rpc GetModel (stream ClientFetchModel) returns (stream ModelReady);
+  rpc ModelPoll (Ready) returns (ReadyReply);
+}
+
+message Ready {
+  string ready = 1;
+}
+
+message ReadyReply {
+  bool ready = 1;
+}
+
+message UpdateData {
+  bytes model = 1;
+  int32 data_size = 2;
+}
+
+message ClientFetchModel {
+  oneof response {
+    bool send_model = 1;
+    UpdateData model_data = 2;
+  }
+}
+
+message ModelReady {
+  oneof response {
+    bool wait = 1;
+    bytes model = 2;
+  }
+}
+

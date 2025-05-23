@@ -1,12 +1,10 @@
 # Petal_FL
 
-py -m grpc_tools.protoc -I=fl_app/proto --python_out=fl_app --grpc_python_out=fl_app fl_app/proto/fl.proto
-- improperly imports fl_pb2 to fl_pb2_grpc, need to fix
+## For simple grpc
+py -m grpc_tools.protoc -I=fl/proto --python_out=. --grpc_python_out=. fl/proto/simple_fl.proto
 
-py -m fl_app.server_app.server
-py -m fl_app.client_app.client -c 1 
-
-Model architecture should be shared ahead of time. Likely at connect msg.
+## For amble grpc
+py -m grpc_tools.protoc -I=fl/proto --python_out=. --grpc_python_out=. fl/proto/amble_fl.proto
 
 should I inclue GPU acceleration? Might reduce start time of PyTorch
 

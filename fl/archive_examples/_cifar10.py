@@ -7,7 +7,7 @@ import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 import torch
-from fl_app.util import torch_tools
+from fl.util import torch_tools
 
 def load_cifar10_partition(client_id, num_clients, batch_size=32):
     transform = transforms.Compose([

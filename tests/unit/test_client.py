@@ -1,4 +1,4 @@
 import unittest
 import asyncio
 
-from fl_app.client_app import client
+from fl.client_app import simple_client

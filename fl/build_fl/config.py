@@ -19,6 +19,7 @@ class Config:
                  model,
                  epochs,
                  learning_rate,
+                 delay=None,
                  options=None):
     
         self.max_clients = max_clients
@@ -28,6 +29,7 @@ class Config:
         self.model_class = model
         self.epochs = epochs
         self.lr = learning_rate
+        self.delay = delay or [(0,0,0)]*max_clients
         self.options = options or []
 
 

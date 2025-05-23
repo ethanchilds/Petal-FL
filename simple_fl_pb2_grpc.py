@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import fl_app.fl_pb2 as fl__pb2
+import simple_fl_pb2 as simple__fl__pb2
 
 GRPC_GENERATED_VERSION = '1.71.0'
 GRPC_VERSION = grpc.__version__
@@ -18,7 +18,7 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + f' but the generated code in fl_pb2_grpc.py depends on'
+        + f' but the generated code in simple_fl_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
@@ -36,13 +36,13 @@ class FedLearnStub(object):
         """
         self.GetModel = channel.stream_stream(
                 '/fl_app.FedLearn/GetModel',
-                request_serializer=fl__pb2.ClientFetchModel.SerializeToString,
-                response_deserializer=fl__pb2.ModelReady.FromString,
+                request_serializer=simple__fl__pb2.ClientFetchModel.SerializeToString,
+                response_deserializer=simple__fl__pb2.ModelReady.FromString,
                 _registered_method=True)
         self.ModelPoll = channel.unary_unary(
                 '/fl_app.FedLearn/ModelPoll',
-                request_serializer=fl__pb2.Ready.SerializeToString,
-                response_deserializer=fl__pb2.ReadyReply.FromString,
+                request_serializer=simple__fl__pb2.Ready.SerializeToString,
+                response_deserializer=simple__fl__pb2.ReadyReply.FromString,
                 _registered_method=True)
 
 
@@ -66,13 +66,13 @@ def add_FedLearnServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'GetModel': grpc.stream_stream_rpc_method_handler(
                     servicer.GetModel,
-                    request_deserializer=fl__pb2.ClientFetchModel.FromString,
-                    response_serializer=fl__pb2.ModelReady.SerializeToString,
+                    request_deserializer=simple__fl__pb2.ClientFetchModel.FromString,
+                    response_serializer=simple__fl__pb2.ModelReady.SerializeToString,
             ),
             'ModelPoll': grpc.unary_unary_rpc_method_handler(
                     servicer.ModelPoll,
-                    request_deserializer=fl__pb2.Ready.FromString,
-                    response_serializer=fl__pb2.ReadyReply.SerializeToString,
+                    request_deserializer=simple__fl__pb2.Ready.FromString,
+                    response_serializer=simple__fl__pb2.ReadyReply.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -100,8 +100,8 @@ class FedLearn(object):
             request_iterator,
             target,
             '/fl_app.FedLearn/GetModel',
-            fl__pb2.ClientFetchModel.SerializeToString,
-            fl__pb2.ModelReady.FromString,
+            simple__fl__pb2.ClientFetchModel.SerializeToString,
+            simple__fl__pb2.ModelReady.FromString,
             options,
             channel_credentials,
             insecure,
@@ -127,8 +127,8 @@ class FedLearn(object):
             request,
             target,
             '/fl_app.FedLearn/ModelPoll',
-            fl__pb2.Ready.SerializeToString,
-            fl__pb2.ReadyReply.FromString,
+            simple__fl__pb2.Ready.SerializeToString,
+            simple__fl__pb2.ReadyReply.FromString,
             options,
             channel_credentials,
             insecure,

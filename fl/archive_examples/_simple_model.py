@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from fl_app.util import torch_tools
+from fl.util import torch_tools
 
 class SimpleNN(nn.Module):
 

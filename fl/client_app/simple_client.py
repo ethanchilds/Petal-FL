@@ -1,15 +1,15 @@
 import grpc
 import io
-from fl_app import fl_pb2
-from fl_app import fl_pb2_grpc
+import simple_fl_pb2 as fl_pb2
+import simple_fl_pb2_grpc as fl_pb2_grpc
 import asyncio
 import argparse
-from fl_app.util import torch_tools
-from fl_app.client_app.sleep_injector import SleepInjector
+from fl.util import torch_tools
+from fl.client_app.sleep_injector import SleepInjector
 
 import time
 
-from fl_app.build_fl.config import get_config
+from fl.build_fl.config import get_config
 
 
 class FedLearnClient():
@@ -22,7 +22,9 @@ class FedLearnClient():
         self.dataloader = self.config.dataloader(client_id)
         self.epochs = self.config.epochs
         self.lr = self.config.lr
-        self.delay = delay
+        self.work_delay = delay[0]
+        self.receive_delay = delay[1]
+        self.send_delay = delay[2]
 
     async def model_poll(self, stub):
         # Assign to a daemon or have it await in future
@@ -40,22 +42,21 @@ class FedLearnClient():
         while True:
 
             response = await response_stream.read()
+            time.sleep(self.receive_delay)
             which = response.WhichOneof("response")
 
             if which == "model":
                 received_model = torch_tools.deserialize(response.model)
                 self.model.load_state_dict(received_model)
 
-                train_time_begin = time.perf_counter()
-                wrapped_loader = SleepInjector(self.dataloader, self.delay)
+                wrapped_loader = SleepInjector(self.dataloader, self.work_delay)
                 self.config.train_function(self.model, wrapped_loader, self.epochs, self.lr)
-                train_time = time.perf_counter() - train_time_begin
 
 
                 update_data = fl_pb2.UpdateData(model=torch_tools.serialize(self.model, self.buffer), data_size=len(self.dataloader))
                 request = fl_pb2.ClientFetchModel(model_data = update_data)
-                request.client_id = self.client_id
-                request.round_time = train_time
+
+                time.sleep(self.send_delay)
                 await response_stream.write(request)
 
             else:

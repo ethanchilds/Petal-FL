@@ -1,21 +1,21 @@
 import grpc
 import io
 import asyncio
-from fl_app import fl_pb2
-from fl_app import fl_pb2_grpc
-from fl_app.server_app.fed_avg import FedAvg
-from fl_app.server_app.amble import Amble
-from fl_app.util import torch_tools
+import amble_fl_pb2 as fl_pb2
+import amble_fl_pb2_grpc as fl_pb2_grpc
+from fl.server_app.fed_avg import FedAvg
+from fl.server_app.amble import Amble
+from fl.util import torch_tools
 
 import copy
 
-from fl_app.logging.log_set_up import setup_logger
+from fl.logging.log_set_up import setup_logger
 logger = setup_logger("server", level="INFO")
 
 import os
 os.environ["GRPC_VERBOSITY"] = "ERROR"
 
-from fl_app.build_fl.config import get_config
+from fl.build_fl.config import get_config
 
 class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
 

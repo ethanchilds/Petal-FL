@@ -1,10 +1,8 @@
 # Necessary for federated learning
-from fl_app.server_app.server import FedLearnServer
-from fl_app.client_app.client import FedLearnClient
-from fl_app.build_fl.config import Config, set_config
-from fl_app.build_fl.run_fl import run_fed_learning
-
-#from fl_app.CIFAR10 import SimpleCNN_CIFAR, load_cifar10_partition, train_CIFAR
+from fl.server_app.simple_server import FedLearnServer
+from fl.client_app.simple_client import FedLearnClient
+from fl.build_fl.config import Config, set_config
+from fl.build_fl.run_fl import run_fed_learning
 
 # Necessary for machine learning
 import torch
@@ -53,8 +51,6 @@ def train_simpleNN(model, dataloader, epochs, lr = 0.01):
 if __name__ == "__main__":
 
     # set proportion of clients
-    # set delay
-    # set network delay too
 
     config = Config(
         max_clients = 2,
@@ -64,6 +60,8 @@ if __name__ == "__main__":
         train_function = train_simpleNN,
         dataloader = get_simple_dataloader,
         model=SimpleNN,
+        # recommend zipping tuples for more advanced settings
+        delay = [(0,0,0),(0,0,0)],
         options=[
             ('grpc.max_send_message_length', 100 * 1024 * 1024),
             ('grpc.max_receive_message_length', 100 * 1024 * 1024),
@@ -72,5 +70,5 @@ if __name__ == "__main__":
 
     set_config(config)
 
-    run_fed_learning(FedLearnServer, FedLearnClient, config.max_clients)
+    run_fed_learning(FedLearnServer, FedLearnClient)
 
