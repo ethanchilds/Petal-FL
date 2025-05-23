@@ -3,31 +3,38 @@ import io
 import asyncio
 from fl_app import fl_pb2
 from fl_app import fl_pb2_grpc
-from fl_app.config import Config
 from fl_app.server_app.fed_avg import FedAvg
+from fl_app.server_app.amble import Amble
 from fl_app.util import torch_tools
 
 import copy
+
 from fl_app.logging.log_set_up import setup_logger
 logger = setup_logger("server", level="INFO")
 
 import os
 os.environ["GRPC_VERBOSITY"] = "ERROR"
 
+from fl_app.config import get_config
+
 class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
 
-    def __init__(self, done_event):
+    def __init__(self, config, done_event):
+        self.config = config
         self.ready_train = True
-        self.model = Config.model()
+        self.model = self.config.model()
         self.lock = asyncio.Lock()
         self.iteration_ready = asyncio.Event()
         self.current_clients = 0
-        self.max_clients = Config.max_clients
+        self.max_clients = self.config.max_clients
         self.current_iteration = 0
-        self.train_iterations = Config.train_iterations
+        self.train_iterations = self.config.train_iterations + 1
         self.need_reset = False
         self.buffer = io.BytesIO()
+
         self.fed_avg = FedAvg()
+        num_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+        self.amble = Amble(processor_speed=3.5, base_epochs=5, base_lr=0.01, base_batch_size=32, model_size=num_params)
 
         # TEMP: Only for cancelling server once fed learn is done
         self.done = done_event
@@ -45,10 +52,12 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
     
     async def GetModel(self, request_iterator, context):
         async for request in request_iterator:
+            client_id = request.client_id
 
             which = request.WhichOneof("response")
             if which == "model_data":
                 await self.fed_avg.add_model(torch_tools.deserialize(request.model_data.model), request.model_data.data_size)
+                await self.amble.add_client_info(client_id, request.round_time, request.model_data.data_size)
                 
             async with self.lock:
                 self.current_clients += 1
@@ -69,8 +78,11 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
                     if which == "model_data":
                         pretrain = copy.deepcopy(self.model.state_dict())
                         updated_model = self.fed_avg.fed_avg()
+                        amble_results = self.amble.AMBLE()
                         self.model.load_state_dict(updated_model)
-                        #print(torch_tools.state_dicts_close(pretrain, updated_model))
+
+                        models_close = torch_tools.state_dicts_close(pretrain, self.model.state_dict())
+                        logger.info(f"Model changed from last time: {models_close}")
 
             if self.current_iteration == self.train_iterations:
                 yield fl_pb2.ModelReady(wait=True)
@@ -84,20 +96,22 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
                 self.done.set()
 
 
-async def serve():
-    done = asyncio.Event()
-    
-    server = grpc.aio.server(options=Config.options)
-    fl_pb2_grpc.add_FedLearnServicer_to_server(FedLearnServicer(done), server)
-    server.add_insecure_port('[::]:50051')
-    await server.start()
-    print('Listening on 50051...')
-    
-    await done.wait()
-    await server.stop(0)
+class FedLearnServer():
 
-async def start_server():
-    await serve()
+    def __init__(self):
+        self.config = get_config()
 
-if __name__ == "__main__":
-    asyncio.run(serve())
+    async def serve(self):
+        done = asyncio.Event()
+        
+        server = grpc.aio.server(options=self.config.options)
+        fl_pb2_grpc.add_FedLearnServicer_to_server(FedLearnServicer(self.config, done), server)
+        server.add_insecure_port('[::]:50051')
+        await server.start()
+        print('Listening on 50051...')
+        
+        await done.wait()
+        await server.stop(0)
+
+    async def start_server(self):
+        await self.serve()

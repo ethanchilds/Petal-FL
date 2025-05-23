@@ -25,6 +25,8 @@ message ClientFetchModel {
     bool send_model = 1;
     UpdateData model_data = 2;
   }
+  int32 client_id = 3;
+  float round_time = 4;
 }
 
 message ModelReady {
