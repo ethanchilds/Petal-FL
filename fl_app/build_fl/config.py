@@ -18,6 +18,7 @@ class Config:
                  dataloader,
                  model,
                  epochs,
+                 learning_rate,
                  options=None):
     
         self.max_clients = max_clients
@@ -26,16 +27,8 @@ class Config:
         self.dataloader = dataloader
         self.model_class = model
         self.epochs = epochs
+        self.lr = learning_rate
         self.options = options or []
-
-    # max_clients = 2
-    # train_iterations = 5
-    # train_function = train_simpleNN
-    # dataloader = get_simple_dataloader
-    # options=[
-    #     ('grpc.max_send_message_length', 100 * 1024 * 1024),  # 100 MB
-    #     ('grpc.max_receive_message_length', 100 * 1024 * 1024),
-    # ]
 
 
     def model(self):

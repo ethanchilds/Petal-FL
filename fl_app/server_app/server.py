@@ -15,7 +15,7 @@ logger = setup_logger("server", level="INFO")
 import os
 os.environ["GRPC_VERBOSITY"] = "ERROR"
 
-from fl_app.config import get_config
+from fl_app.build_fl.config import get_config
 
 class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
 

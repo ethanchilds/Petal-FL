@@ -9,7 +9,7 @@ from fl_app.client_app.sleep_injector import SleepInjector
 
 import time
 
-from fl_app.config import get_config
+from fl_app.build_fl.config import get_config
 
 
 class FedLearnClient():
@@ -21,6 +21,7 @@ class FedLearnClient():
         self.buffer = io.BytesIO()
         self.dataloader = self.config.dataloader(client_id)
         self.epochs = self.config.epochs
+        self.lr = self.config.lr
         self.delay = delay
 
     async def model_poll(self, stub):
@@ -47,9 +48,8 @@ class FedLearnClient():
 
                 train_time_begin = time.perf_counter()
                 wrapped_loader = SleepInjector(self.dataloader, self.delay)
-                self.config.train_function(self.model, wrapped_loader, self.epochs)
+                self.config.train_function(self.model, wrapped_loader, self.epochs, self.lr)
                 train_time = time.perf_counter() - train_time_begin
-                print(train_time)
 
 
                 update_data = fl_pb2.UpdateData(model=torch_tools.serialize(self.model, self.buffer), data_size=len(self.dataloader))
