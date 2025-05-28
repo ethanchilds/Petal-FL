@@ -4,6 +4,8 @@ import io
 from torch.utils.data import TensorDataset, DataLoader
 
 def serialize(model, buffer):
+        buffer.seek(0)
+        buffer.truncate(0)
         torch.save(model.state_dict(), buffer)
         return buffer.getvalue()
 

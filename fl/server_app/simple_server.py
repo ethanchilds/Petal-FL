@@ -78,11 +78,14 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
                         models_close = torch_tools.state_dicts_close(pretrain, self.model.state_dict())
                         logger.info(f"Model changed from last time: {models_close}")
 
+                        self.config.eval(self.model)
+
             if self.current_iteration == self.train_iterations:
                 yield fl_pb2.ModelReady(wait=True)
                 break
             else:
-                yield fl_pb2.ModelReady(model=torch_tools.serialize(self.model, self.buffer))
+                model=torch_tools.serialize(self.model, self.buffer)
+                yield fl_pb2.ModelReady(model=model)
 
         async with self.lock:
             self.clients_done += 1

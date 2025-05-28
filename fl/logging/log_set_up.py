@@ -2,7 +2,7 @@ import logging
 import os
 from datetime import datetime
 
-def setup_logger(name: str, log_dir: str = "fl/logging/logs", level=logging.INFO, to_console=True):
+def setup_logger(name: str, log_dir: str = "logging/logs", level=logging.INFO, to_console=True):
     os.makedirs(log_dir, exist_ok=True)
     log_path = os.path.join(log_dir, f"{name}.log")
 

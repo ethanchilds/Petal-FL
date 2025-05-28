@@ -3,11 +3,10 @@ import io
 import amble_fl_pb2 as fl_pb2
 import amble_fl_pb2_grpc as fl_pb2_grpc
 import asyncio
+import time
 import argparse
 from fl.util import torch_tools
 from fl.client_app.sleep_injector import SleepInjector
-
-import time
 
 from fl.build_fl.config import get_config
 
@@ -25,6 +24,11 @@ class FedLearnClient():
         self.work_delay = delay[0]
         self.receive_delay = delay[1]
         self.send_delay = delay[2]
+
+        if self.config.partition:
+            self.dataloader = self.subset_loader(self.config.dataloader(), self.config.max_clients, client_id)
+        else:
+            self.dataloader = self.config.dataloader()
 
     async def model_poll(self, stub):
         # Assign to a daemon or have it await in future
@@ -55,7 +59,7 @@ class FedLearnClient():
                 train_time = time.perf_counter() - train_time_begin
 
 
-                update_data = fl_pb2.UpdateData(model=torch_tools.serialize(self.model, self.buffer), data_size=len(self.dataloader))
+                update_data = fl_pb2.UpdateData(model=torch_tools.serialize(self.model, self.buffer), data_size=len(self.dataloader.dataset))
                 request = fl_pb2.ClientFetchModel(model_data = update_data)
                 request.client_id = self.client_id
                 request.round_time = train_time

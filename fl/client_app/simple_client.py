@@ -54,12 +54,12 @@ class FedLearnClient():
             if which == "model":
                 received_model = torch_tools.deserialize(response.model)
                 self.model.load_state_dict(received_model)
-
+                
                 wrapped_loader = SleepInjector(self.dataloader, self.work_delay)
                 self.config.train_function(self.model, wrapped_loader, self.epochs, self.lr)
 
 
-                update_data = fl_pb2.UpdateData(model=torch_tools.serialize(self.model, self.buffer), data_size=len(self.dataloader))
+                update_data = fl_pb2.UpdateData(model=torch_tools.serialize(self.model, self.buffer), data_size=len(self.dataloader.dataset))
                 request = fl_pb2.ClientFetchModel(model_data = update_data)
 
                 time.sleep(self.send_delay)

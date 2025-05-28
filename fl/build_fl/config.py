@@ -17,6 +17,7 @@ class Config:
                  train_function,
                  dataloader,
                  model,
+                 evaluation_function,
                  epochs,
                  learning_rate,
                  partition = False,
@@ -28,6 +29,7 @@ class Config:
         self.train_function = train_function
         self.dataloader = dataloader
         self.model_class = model
+        self.eval = evaluation_function
         self.epochs = epochs
         self.lr = learning_rate
         self.partition = partition
