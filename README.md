@@ -9,3 +9,7 @@ py -m grpc_tools.protoc -I=fl/proto --python_out=. --grpc_python_out=. fl/proto/
 should I inclue GPU acceleration? Might reduce start time of PyTorch
 
 Need to implement server refresh mechanism
+
+docker build -t petal-fl .
+docker run --rm petal-fl
+docker run --rm petal-fl python examples/cifar_simple.py
