@@ -9,6 +9,10 @@ def get_config():
         raise RuntimeError("Config has not been set yet. Call set_config(config_obj) first.")
     return _config
 
+def false(x):
+    return False
+
+
 class Config:
 
     def __init__(self, 
@@ -20,6 +24,7 @@ class Config:
                  evaluation_function,
                  epochs,
                  learning_rate,
+                 stop_condition = false,
                  partition = False,
                  delay=None,
                  options=None):
@@ -33,6 +38,7 @@ class Config:
         self.epochs = epochs
         self.lr = learning_rate
         self.partition = partition
+        self.stop_condition = stop_condition
         self.delay = delay or [(0,0,0)]*max_clients
         self.options = options or []
 

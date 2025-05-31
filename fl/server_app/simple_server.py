@@ -6,7 +6,7 @@ import simple_fl_pb2_grpc as fl_pb2_grpc
 from fl.server_app.fed_avg import FedAvg
 from fl.util import torch_tools
 
-import copy
+import time
 
 from fl.logging.log_set_up import setup_logger
 logger = setup_logger("server", level="INFO")
@@ -30,12 +30,17 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
         self.train_iterations = self.config.train_iterations + 1
         self.need_reset = False
         self.buffer = io.BytesIO()
+        self.stop_condition = self.config.stop_condition
+        self.eval = 0
 
         self.fed_avg = FedAvg()
 
         # TEMP: Only for cancelling server once fed learn is done
         self.done = done_event
         self.clients_done = 0
+
+        self.begin = 0
+        self.end = 0
 
     def get_ready_train(self):
         return self.ready_train
@@ -59,6 +64,8 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
                 if self.current_clients == self.max_clients:
                     self.iteration_ready.set()
                     self.need_reset = True
+                    if self.current_iteration == 0:
+                        self.begin = time.perf_counter()
 
             await self.iteration_ready.wait()
 
@@ -71,16 +78,13 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
                     self.current_iteration += 1
 
                     if which == "model_data":
-                        pretrain = copy.deepcopy(self.model.state_dict())
                         updated_model = self.fed_avg.fed_avg()
                         self.model.load_state_dict(updated_model)
 
-                        models_close = torch_tools.state_dicts_close(pretrain, self.model.state_dict())
-                        logger.info(f"Model changed from last time: {models_close}")
+                        self.eval = self.config.eval(self.model)
 
-                        self.config.eval(self.model)
 
-            if self.current_iteration == self.train_iterations:
+            if self.current_iteration == self.train_iterations or self.stop_condition(self.eval):
                 yield fl_pb2.ModelReady(wait=True)
                 break
             else:
@@ -90,6 +94,8 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
         async with self.lock:
             self.clients_done += 1
             if self.clients_done == self.max_clients:
+                self.end = time.perf_counter()
+                print("Process took:", self.end - self.begin)
                 self.done.set()
 
 

@@ -83,27 +83,34 @@ def evaluate_CIFAR(model):
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
-    accuracy = 100 * correct / total
+    accuracy = 100*correct / total
     avg_loss = test_loss / len(testloader)
     print(f"Test Loss: {avg_loss:.4f}, Test Accuracy: {accuracy:.2f}%")
 
-    return avg_loss, accuracy
+    return accuracy
+
+def stop_condition(value):
+    if (value / 100) > 0.9:
+        return True
+    else:
+        return False
 
 if __name__ == "__main__":
 
     # set proportion of clients
 
     config = Config(
-        max_clients = 2,
-        train_iterations = 3,
-        epochs = 2,
+        max_clients = 5,
+        train_iterations = 20,
+        epochs = 3,
         learning_rate = 0.01,
         train_function = train_CIFAR,
         dataloader = load_cifar10,
         model=SimpleCNN_CIFAR,
         evaluation_function=evaluate_CIFAR,
+        stop_condition=stop_condition,
         # recommend zipping tuples for more advanced settings
-        delay = [(0,0,0),(0,0,0)],
+        delay = [(0.1,0,0), (0.2,0,0), (0.3, 0, 0), (0.4,0,0), (0.5,0,0)],
         partition=True,
         options=[
             ('grpc.max_send_message_length', 100 * 1024 * 1024),

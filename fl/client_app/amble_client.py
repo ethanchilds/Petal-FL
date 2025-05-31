@@ -5,6 +5,8 @@ import amble_fl_pb2_grpc as fl_pb2_grpc
 import asyncio
 import time
 import argparse
+import numpy as np
+from torch.utils.data import DataLoader, Subset
 from fl.util import torch_tools
 from fl.client_app.sleep_injector import SleepInjector
 
@@ -18,7 +20,7 @@ class FedLearnClient():
         self.client_id = client_id
         self.model = self.config.model()
         self.buffer = io.BytesIO()
-        self.dataloader = self.config.dataloader(client_id)
+        self.dataloader = self.config.dataloader()
         self.epochs = self.config.epochs
         self.lr = self.config.lr
         self.work_delay = delay[0]
@@ -55,7 +57,7 @@ class FedLearnClient():
 
                 train_time_begin = time.perf_counter()
                 wrapped_loader = SleepInjector(self.dataloader, self.work_delay)
-                self.config.train_function(self.model, wrapped_loader, self.epochs, self.lr)
+                self.config.train_function(self.model, wrapped_loader, response.epoch, self.lr)
                 train_time = time.perf_counter() - train_time_begin
 
 
@@ -80,6 +82,21 @@ class FedLearnClient():
 
             if poll_result:
                 await self.train_model(stub)
+
+    def subset_loader(self, dataloader, num_clients, client_id):
+        dataset = dataloader.dataset
+        data_len = len(dataset)
+        indices = list(range(data_len))
+        np.random.seed(42)
+        np.random.shuffle(indices)
+
+        partition_size = data_len // num_clients
+        start = client_id * partition_size
+        end = start + partition_size
+
+        subset = Subset(dataset, indices[start:end])
+        subset_loader = DataLoader(subset, batch_size=dataloader.batch_size, shuffle=False)
+        return subset_loader
 
 async def start_client(client_id, num_clients):
     client = FedLearnClient(client_id, num_clients)

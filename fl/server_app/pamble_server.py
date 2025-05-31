@@ -9,6 +9,8 @@ from fl.util import torch_tools
 
 import time
 
+from concurrent.futures import ProcessPoolExecutor
+
 from fl.logging.log_set_up import setup_logger
 logger = setup_logger("server", level="INFO")
 
@@ -45,6 +47,7 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
 
         self.begin = 0
         self.end = 0
+
 
     def get_ready_train(self):
         return self.ready_train
@@ -84,9 +87,13 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
                     self.current_iteration += 1
 
                     if which == "model_data":
-                        updated_model = self.fed_avg.fed_avg()
-                        self.amble_results = self.amble.AMBLE()
+                        with ProcessPoolExecutor(max_workers=2) as executor:
+                            future1 = executor.submit(run_fedavg_wrapper, self.fed_avg)
+                            future2 = executor.submit(run_amble_wrapper, self.amble)
 
+                            updated_model = future1.result()
+                            self.amble_results = future2.result()
+                        
                         self.model.load_state_dict(updated_model)
                         self.config.eval(self.model)
 
@@ -105,6 +112,12 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
                 self.end = time.perf_counter()
                 print("Process took:", self.end - self.begin)
                 self.done.set()
+
+def run_fedavg_wrapper(fed_avg):
+    return fed_avg.fed_avg()
+
+def run_amble_wrapper(amble):
+    return amble.AMBLE()
 
 
 class FedLearnServer():

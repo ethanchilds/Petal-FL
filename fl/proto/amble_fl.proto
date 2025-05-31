@@ -34,5 +34,6 @@ message ModelReady {
     bool wait = 1;
     bytes model = 2;
   }
+  int32 epoch = 3;
 }
 

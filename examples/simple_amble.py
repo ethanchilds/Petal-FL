@@ -1,6 +1,6 @@
 # Necessary for federated learning
-from fl.server_app.simple_server import FedLearnServer
-from fl.client_app.simple_client import FedLearnClient
+from fl.server_app.amble_server import FedLearnServer
+from fl.client_app.amble_client import FedLearnClient
 from fl.build_fl.config import Config, set_config
 from fl.build_fl.run_fl import run_fed_learning
 
@@ -64,17 +64,9 @@ def evaluate_simpleNN(model):
 
 
     print(f"Evaluation Results — MSE: {mse:.4f}, R²: {r2:.4f}")
-    return r2
-
-def stop_conditon(value):
-    if value > 0.9:
-        return True
-    else:
-        return False
+    return mse, r2
 
 if __name__ == "__main__":
-
-    # set proportion of clients
 
     config = Config(
         max_clients = 2,
@@ -85,10 +77,14 @@ if __name__ == "__main__":
         dataloader = get_simple_dataloader,
         model=SimpleNN,
         evaluation_function=evaluate_simpleNN,
-        stop_condition=stop_conditon,
         # recommend zipping tuples for more advanced settings
         partition=True,
-        delay = [(0,0,0),(0,0,0)]
+
+        # Delay provides each client with three parameters (x1, x2, x3)
+        # x1 controls the added delay between each epoch
+        # x2 controls the added delay after the model is received
+        # x3 controls the added delay before the model is sent back
+        delay = [(0.01,0,0),(2,0,0)]
     )
 
     set_config(config)

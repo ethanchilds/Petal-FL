@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0e\x61mble_fl.proto\x12\x06\x66l_app\"\x16\n\x05Ready\x12\r\n\x05ready\x18\x01 \x01(\t\"\x1b\n\nReadyReply\x12\r\n\x05ready\x18\x01 \x01(\x08\".\n\nUpdateData\x12\r\n\x05model\x18\x01 \x01(\x0c\x12\x11\n\tdata_size\x18\x02 \x01(\x05\"\x85\x01\n\x10\x43lientFetchModel\x12\x14\n\nsend_model\x18\x01 \x01(\x08H\x00\x12(\n\nmodel_data\x18\x02 \x01(\x0b\x32\x12.fl_app.UpdateDataH\x00\x12\x11\n\tclient_id\x18\x03 \x01(\x05\x12\x12\n\nround_time\x18\x04 \x01(\x02\x42\n\n\x08response\"9\n\nModelReady\x12\x0e\n\x04wait\x18\x01 \x01(\x08H\x00\x12\x0f\n\x05model\x18\x02 \x01(\x0cH\x00\x42\n\n\x08response2x\n\x08\x46\x65\x64Learn\x12<\n\x08GetModel\x12\x18.fl_app.ClientFetchModel\x1a\x12.fl_app.ModelReady(\x01\x30\x01\x12.\n\tModelPoll\x12\r.fl_app.Ready\x1a\x12.fl_app.ReadyReplyb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0e\x61mble_fl.proto\x12\x06\x66l_app\"\x16\n\x05Ready\x12\r\n\x05ready\x18\x01 \x01(\t\"\x1b\n\nReadyReply\x12\r\n\x05ready\x18\x01 \x01(\x08\".\n\nUpdateData\x12\r\n\x05model\x18\x01 \x01(\x0c\x12\x11\n\tdata_size\x18\x02 \x01(\x05\"\x85\x01\n\x10\x43lientFetchModel\x12\x14\n\nsend_model\x18\x01 \x01(\x08H\x00\x12(\n\nmodel_data\x18\x02 \x01(\x0b\x32\x12.fl_app.UpdateDataH\x00\x12\x11\n\tclient_id\x18\x03 \x01(\x05\x12\x12\n\nround_time\x18\x04 \x01(\x02\x42\n\n\x08response\"H\n\nModelReady\x12\x0e\n\x04wait\x18\x01 \x01(\x08H\x00\x12\x0f\n\x05model\x18\x02 \x01(\x0cH\x00\x12\r\n\x05\x65poch\x18\x03 \x01(\x05\x42\n\n\x08response2x\n\x08\x46\x65\x64Learn\x12<\n\x08GetModel\x12\x18.fl_app.ClientFetchModel\x1a\x12.fl_app.ModelReady(\x01\x30\x01\x12.\n\tModelPoll\x12\r.fl_app.Ready\x1a\x12.fl_app.ReadyReplyb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -40,7 +40,7 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_CLIENTFETCHMODEL']._serialized_start=128
   _globals['_CLIENTFETCHMODEL']._serialized_end=261
   _globals['_MODELREADY']._serialized_start=263
-  _globals['_MODELREADY']._serialized_end=320
-  _globals['_FEDLEARN']._serialized_start=322
-  _globals['_FEDLEARN']._serialized_end=442
+  _globals['_MODELREADY']._serialized_end=335
+  _globals['_FEDLEARN']._serialized_start=337
+  _globals['_FEDLEARN']._serialized_end=457
 # @@protoc_insertion_point(module_scope)
