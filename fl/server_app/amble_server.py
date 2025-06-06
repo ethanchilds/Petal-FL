@@ -88,9 +88,9 @@ class FedLearnServicer(fl_pb2_grpc.FedLearnServicer):
                         self.amble_results = self.amble.AMBLE()
 
                         self.model.load_state_dict(updated_model)
-                        self.config.eval(self.model)
+                        self.eval = self.config.eval(self.model)
 
-            if self.current_iteration == self.train_iterations:
+            if self.current_iteration == self.train_iterations or self.stop_condition(self.eval):
                 yield fl_pb2.ModelReady(wait=True)
                 break
             else:

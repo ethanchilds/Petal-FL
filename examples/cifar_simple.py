@@ -1,6 +1,6 @@
 # Necessary for federated learning
-from fl.server_app.simple_server import FedLearnServer
-from fl.client_app.simple_client import FedLearnClient
+from fl.server_app.pamble_server import FedLearnServer
+from fl.client_app.amble_client import FedLearnClient
 from fl.build_fl.config import Config, set_config
 from fl.build_fl.run_fl import run_fed_learning
 
@@ -90,7 +90,7 @@ def evaluate_CIFAR(model):
     return accuracy
 
 def stop_condition(value):
-    if (value / 100) > 0.9:
+    if (value / 100) > 0.7:
         return True
     else:
         return False
@@ -102,7 +102,7 @@ if __name__ == "__main__":
     config = Config(
         max_clients = 5,
         train_iterations = 20,
-        epochs = 3,
+        epochs = 2,
         learning_rate = 0.01,
         train_function = train_CIFAR,
         dataloader = load_cifar10,
@@ -110,7 +110,7 @@ if __name__ == "__main__":
         evaluation_function=evaluate_CIFAR,
         stop_condition=stop_condition,
         # recommend zipping tuples for more advanced settings
-        delay = [(0.1,0,0), (0.2,0,0), (0.3, 0, 0), (0.4,0,0), (0.5,0,0)],
+        delay = [(0.1,0,0), (0.2,0,0), (0.3, 0, 0), (0.8,0,0), (15,0,0)],
         partition=True,
         options=[
             ('grpc.max_send_message_length', 100 * 1024 * 1024),
