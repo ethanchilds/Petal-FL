@@ -1,9 +1,5 @@
 # Petal-FL 🌸
-*A Modular Federated Learning System using PyTorch & gRPC*
-
-[![License](https://img.shields.io/github/license/ethanchilds/Petal-FL)](LICENSE)
-[![Issues](https://img.shields.io/github/issues/ethanchilds/Petal-FL)](https://github.com/ethanchilds/Petal-FL/issues)
-[![Stars](https://img.shields.io/github/stars/ethanchilds/Petal-FL?style=social)](https://github.com/ethanchilds/Petal-FL/stargazers)
+*A Modular Federated Learning Framework for Experimenting With Client Heterogeneity*
 
 ---
 
