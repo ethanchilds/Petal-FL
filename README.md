@@ -6,7 +6,7 @@
 [![Stars](https://img.shields.io/github/stars/ethanchilds/Petal-FL?style=social)](https://github.com/ethanchilds/Petal-FL/stargazers)
 ---
 
-## 📖 Overview
+## Overview
 
 Petal-FL is a simple federated learning framework built with the express intention of providing users with out-of-the-box simulation of client device heterogeneity. This framework has been built with PyTorch for all machine learning functionalities and gRPC as a middleware service.
 
@@ -14,6 +14,17 @@ Petal-FL is a simple federated learning framework built with the express intenti
 
 ## Table of Contents
 
+- [Overview](#-overview)
+- [Usage Manual](#usage-manual)
+  - [Imports](#imports)
+  - [Model](#model)
+  - [Dataloader](#dataloader)
+  - [Training](#training)
+  - [Evaluation](#evaluation)
+  - [Config and Running](#config-and-running)
+  - [Optional Parameters and Functions](#optional-parameters-and-functions)
+- [Virtualization](#virtualization)
+- [A Quick Discussion on the Current State of Petal-FL](#a-quick-discussion-on-the-current-state-of-petal-fl)
 
 ## Usage Manual
 
