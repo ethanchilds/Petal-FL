@@ -1,6 +1,6 @@
 # Necessary for federated learning
-from fl.server_app.simple_server import FedLearnServer
-from fl.client_app.simple_client import FedLearnClient
+from fl.server_app.amble_server import FedLearnServer
+from fl.client_app.amble_client import FedLearnClient
 from fl.build_fl.config import Config, set_config
 from fl.build_fl.run_fl import run_fed_learning
 
@@ -88,7 +88,7 @@ if __name__ == "__main__":
         stop_condition=stop_conditon,
         # recommend zipping tuples for more advanced settings
         partition=True,
-        delay = [(0,0,0),(0,0,0)]
+        delay = [(0.1,0,0),(0,0,0)]
     )
 
     set_config(config)
